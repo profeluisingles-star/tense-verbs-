@@ -1,0 +1,6 @@
+{
+  "name": "ESL Verb Tenses Master",
+  "description": "Plataforma interactiva para dominar los 12 tiempos verbales en inglés con ejercicios de escritura, escucha, sistema de vidas, recompensas y certificación de nivel A1 a C1.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
