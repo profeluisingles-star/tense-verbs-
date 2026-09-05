@@ -13,6 +13,7 @@ export const createDefaultUser = (name: string): UserProgress => {
     practiceStats: {},
     levelMasteryPercent: { 1: 0, 2: 0, 3: 0 },
     completedQuizzes: [],
+    completedModules: [],
     quizScores: {},
     securityViolationsCount: 0,
     mistakesHistory: [],
@@ -31,13 +32,19 @@ export const getInitialProgress = (): UserProgress => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Migration check
+      // Migration check & defensive guards
       if (!parsed.practiceStats) parsed.practiceStats = {};
       if (!parsed.levelMasteryPercent) parsed.levelMasteryPercent = { 1: 0, 2: 0, 3: 0 };
-      if (!parsed.completedQuizzes) parsed.completedQuizzes = [];
+      if (!Array.isArray(parsed.completedQuizzes)) parsed.completedQuizzes = [];
+      if (!Array.isArray(parsed.completedModules)) parsed.completedModules = [...parsed.completedQuizzes];
+      if (!Array.isArray(parsed.unlockedBadges)) parsed.unlockedBadges = [];
+      if (!Array.isArray(parsed.mistakesHistory)) parsed.mistakesHistory = [];
       if (!parsed.quizScores) parsed.quizScores = {};
-      if (!parsed.mistakesHistory) parsed.mistakesHistory = [];
       if (typeof parsed.securityViolationsCount !== 'number') parsed.securityViolationsCount = 0;
+      if (typeof parsed.totalQuestionsAnswered !== 'number') parsed.totalQuestionsAnswered = 0;
+      if (typeof parsed.correctAnswersCount !== 'number') parsed.correctAnswersCount = 0;
+      if (typeof parsed.xp !== 'number') parsed.xp = 0;
+      if (typeof parsed.level !== 'number') parsed.level = 1;
       return parsed;
     }
   } catch (e) {

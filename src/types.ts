@@ -123,6 +123,7 @@ export interface UserProgress {
   
   // Quizzes & Final Exam
   completedQuizzes: number[]; // [1, 2, 3, 4]
+  completedModules?: number[]; // backwards compatibility
   quizScores: Record<number, { 
     score: number; 
     maxScore: number; 

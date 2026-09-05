@@ -424,7 +424,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             )}
 
-            {(isFinalExamPassed || progress.completedModules.length === 4) && (
+            {(isFinalExamPassed || (progress.completedQuizzes && progress.completedQuizzes.length >= 3)) && (
               <button
                 onClick={onOpenCertificate}
                 className="px-5 py-4 rounded-2xl bg-white hover:bg-slate-200 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-lg flex items-center justify-center gap-2"

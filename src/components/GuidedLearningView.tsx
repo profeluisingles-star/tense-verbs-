@@ -16,16 +16,26 @@ import { VerbTense, TenseCategory } from '../types';
 import { playEnglishAudio } from '../utils/audio';
 
 interface GuidedLearningViewProps {
+  initialLevelId?: number;
   onStartPractice: (levelId: number, tenseId?: string) => void;
   selectedTenseId?: string;
+  onBackToDashboard?: () => void;
 }
 
 export const GuidedLearningView: React.FC<GuidedLearningViewProps> = ({
+  initialLevelId,
   onStartPractice,
-  selectedTenseId
+  selectedTenseId,
+  onBackToDashboard
 }) => {
-  const [activeCategory, setActiveCategory] = useState<TenseCategory>('present');
-  const [activeTenseId, setActiveTenseId] = useState<string>(selectedTenseId || 'simple-present');
+  const getDefaultCategory = (lvl?: number): TenseCategory => {
+    if (lvl === 2) return 'past';
+    if (lvl === 3) return 'future';
+    return 'present';
+  };
+
+  const [activeCategory, setActiveCategory] = useState<TenseCategory>(getDefaultCategory(initialLevelId));
+  const [activeTenseId, setActiveTenseId] = useState<string>(selectedTenseId || (initialLevelId === 2 ? 'simple-past' : initialLevelId === 3 ? 'simple-future' : 'simple-present'));
   const [playingAudioKey, setPlayingAudioKey] = useState<string | null>(null);
 
   // Group tenses by category

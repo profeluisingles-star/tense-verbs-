@@ -35,7 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCertificate,
   onChangeStudent
 }) => {
-  const isCertified = !!progress.finalExamScore || progress.completedModules.length === 4;
+  const isCertified = !!progress.finalExamScore || (progress.completedQuizzes && progress.completedQuizzes.length >= 3);
 
   return (
     <header className="bg-[#020617]/95 border-b border-slate-800 text-slate-100 sticky top-0 z-40 shadow-2xl backdrop-blur-md">

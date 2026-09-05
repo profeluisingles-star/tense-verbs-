@@ -18,24 +18,31 @@ import { PRACTICE_EXERCISES } from '../data/practiceData';
 import { playEnglishAudio } from '../utils/audio';
 
 interface PracticeViewProps {
-  levelId: number;
+  levelId?: number;
+  initialLevelId?: number;
   initialTenseId?: string;
   userProgress: UserProgress;
   onUpdateProgress: (updated: UserProgress) => void;
-  onGoToEvaluation: (levelId: number) => void;
-  onBackToLearn: () => void;
+  onGoToEvaluation?: (levelId: number) => void;
+  onStartEvaluation?: (levelId: number) => void;
+  onBackToLearn?: () => void;
+  onBackToDashboard?: () => void;
 }
 
 export const PracticeView: React.FC<PracticeViewProps> = ({
   levelId,
+  initialLevelId,
   initialTenseId,
   userProgress,
   onUpdateProgress,
   onGoToEvaluation,
-  onBackToLearn
+  onStartEvaluation,
+  onBackToLearn,
+  onBackToDashboard
 }) => {
+  const activeLevel = initialLevelId || levelId || 1;
   // Filter exercises for this level
-  const exercises = PRACTICE_EXERCISES.filter(ex => ex.levelId === levelId);
+  const exercises = PRACTICE_EXERCISES.filter(ex => ex.levelId === activeLevel);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   
   // User input states
@@ -67,7 +74,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       setAvailableWords(shuffled);
       setOrderedWords([]);
     }
-  }, [currentIndex, levelId]);
+  }, [currentIndex, activeLevel]);
 
   const handlePlayAudio = async (text: string) => {
     setIsPlayingAudio(true);
@@ -510,7 +517,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
             </button>
 
             <button
-              onClick={() => onGoToEvaluation(levelId)}
+              onClick={() => {
+                if (onStartEvaluation) onStartEvaluation(activeLevel);
+                else if (onGoToEvaluation) onGoToEvaluation(activeLevel);
+              }}
               className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-xl shadow-amber-950/50"
             >
               <GraduationCap className="w-4 h-4" />

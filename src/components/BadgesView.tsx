@@ -123,8 +123,8 @@ export const BadgesView: React.FC<BadgesViewProps> = ({ progress, onOpenCertific
             <TrendingUp className="w-4 h-4 text-amber-400" />
             <span>Niveles Aprobados</span>
           </div>
-          <p className="text-2xl font-extrabold text-white">{progress.completedModules.length} / 4</p>
-          <span className="text-[11px] text-slate-500">Present, Past, Future, Master</span>
+          <p className="text-2xl font-extrabold text-white">{(progress.completedQuizzes?.length || 0)} / 3</p>
+          <span className="text-[11px] text-slate-500">Present, Past, Future</span>
         </div>
 
         <div className="bg-[#0f172a] p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-xl">
@@ -194,7 +194,7 @@ export const BadgesView: React.FC<BadgesViewProps> = ({ progress, onOpenCertific
       </div>
 
       {/* Graduation Banner CTA if completed */}
-      {progress.completedModules.length === 4 && (
+      {(progress.finalExamScore || (progress.completedQuizzes && progress.completedQuizzes.length >= 3)) && (
         <div className="mt-8 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 p-6 sm:p-8 rounded-3xl text-slate-950 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
           <div>
             <span className="text-[11px] font-black uppercase tracking-wider bg-slate-950 text-amber-300 px-3 py-1 rounded-full">
