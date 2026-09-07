@@ -20,7 +20,7 @@ import {
   checkAndUnlockBadges,
   generateCertificateCode 
 } from './utils/progress';
-import { Trophy, ShieldAlert } from 'lucide-react';
+import { Trophy, ShieldAlert, Lock } from 'lucide-react';
 
 export default function App() {
   const [progress, setProgress] = useState<UserProgress>(getInitialProgress);
@@ -76,6 +76,32 @@ export default function App() {
   };
 
   const handleStartStage3 = (moduleId: number) => {
+    const q1Passed = progress.completedQuizzes.includes(1);
+    const q2Passed = progress.completedQuizzes.includes(2);
+    const q3Passed = progress.completedQuizzes.includes(3);
+
+    // Prerequisite enforcement:
+    // Level 1 Quiz (id: 1) -> Always accessible
+    // Level 2 Quiz (id: 2) -> Requires Quiz 1 passed
+    // Level 3 Quiz (id: 3) -> Requires Quiz 2 passed
+    // Final Exam (id: 4) -> Strictly requires Quiz 1, 2, AND 3 passed
+    if (moduleId === 2 && !q1Passed) {
+      alert("🔒 Quiz Nivel 2 Bloqueado: Debes rendir y aprobar primero el Quiz del Nivel 1 (Tiempos Presentes) con al menos 16/20 puntos (80%).");
+      return;
+    }
+    if (moduleId === 3 && !q2Passed) {
+      alert("🔒 Quiz Nivel 3 Bloqueado: Debes rendir y aprobar primero el Quiz del Nivel 2 (Tiempos Pasados) con al menos 16/20 puntos (80%).");
+      return;
+    }
+    if (moduleId === 4 && (!q1Passed || !q2Passed || !q3Passed)) {
+      const pending: string[] = [];
+      if (!q1Passed) pending.push('Quiz Nivel 1: Tiempos Presentes');
+      if (!q2Passed) pending.push('Quiz Nivel 2: Tiempos Pasados');
+      if (!q3Passed) pending.push('Quiz Nivel 3: Tiempos Futuros');
+      alert(`🔒 EXAMEN FINAL BLOQUEADO\n\nNo es posible rendir el Examen Final sin haber aprobado los 3 quizzes previos con nota mínima de 16/20 (80%).\n\nQuizzes pendientes:\n• ${pending.join('\n• ')}`);
+      return;
+    }
+
     const targetModule = EVALUATION_MODULES.find(m => m.id === moduleId) || EVALUATION_MODULES[0];
     setActiveQuizModule(targetModule);
     setCurrentView('quiz');
@@ -360,8 +386,9 @@ export default function App() {
                         <span>{isPassed ? 'Reintentar Evaluación' : 'Iniciar Prueba Oficial (3 Vidas)'}</span>
                       </button>
                     ) : (
-                      <div className="w-full py-3 bg-slate-900 border border-slate-800 text-slate-500 rounded-2xl text-xs font-bold text-center">
-                        {mod.isFinalExam ? 'Supera los 3 quizzes previos para desbloquear' : `Supera el Quiz ${mod.id - 1} para desbloquear`}
+                      <div className="w-full py-3.5 bg-slate-900 border border-slate-800 text-slate-400 rounded-2xl text-xs font-bold flex items-center justify-center gap-2">
+                        <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                        <span>{mod.isFinalExam ? 'Bloqueado: Aprueba los Quizzes 1, 2 y 3 para desbloquear' : `Bloqueado: Aprueba el Quiz Nivel ${mod.id - 1} para desbloquear`}</span>
                       </div>
                     )}
                   </div>

@@ -46,6 +46,7 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
   
   // Input states
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [shuffledOptions, setShuffledOptions] = useState<string[]>([]);
   const [writtenAnswer, setWrittenAnswer] = useState<string>('');
   const [orderedTiles, setOrderedTiles] = useState<string[]>([]);
   const [availableTiles, setAvailableTiles] = useState<string[]>([]);
@@ -101,6 +102,18 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
     setSelectedOption(null);
     setWrittenAnswer('');
     
+    // Dynamically randomize/shuffle options for multiple choice, listening, reading, error_correction
+    if (currentQuestion?.options && currentQuestion.options.length > 0) {
+      const opts = [...currentQuestion.options];
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]];
+      }
+      setShuffledOptions(opts);
+    } else {
+      setShuffledOptions([]);
+    }
+
     if (currentQuestion?.type === 'structure_order' && currentQuestion.wordTiles) {
       const shuffled = [...currentQuestion.wordTiles].sort(() => Math.random() - 0.5);
       setAvailableTiles(shuffled);
@@ -345,32 +358,33 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
           <p className="text-base sm:text-lg text-white font-semibold leading-relaxed whitespace-pre-line">
             {currentQuestion.prompt}
           </p>
-          {currentQuestion.contextHint && !isAnswerSubmitted && (
-            <p className="text-xs text-slate-400 mt-2 italic">
-              Indicación: {currentQuestion.contextHint}
-            </p>
-          )}
         </div>
 
         {/* INPUT FORMATS */}
 
         {/* 1. Multiple Choice / Reading / Error Correction / Listening */}
-        {currentQuestion.options && currentQuestion.options.length > 0 && (
+        {(shuffledOptions.length > 0 || (currentQuestion.options && currentQuestion.options.length > 0)) && (
           <div className="space-y-2.5 mb-6">
-            {currentQuestion.options.map((option, idx) => {
+            {(shuffledOptions.length > 0 ? shuffledOptions : currentQuestion.options || []).map((option, idx) => {
+              const letter = ['A', 'B', 'C', 'D', 'E'][idx] || `${idx + 1}`;
               const isSelected = selectedOption === option;
               let btnClass = 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800 hover:border-slate-700';
+              let badgeClass = 'bg-slate-800 text-slate-300 border-slate-700';
 
               if (isAnswerSubmitted) {
                 if (option === currentQuestion.correctAnswer) {
                   btnClass = 'bg-emerald-500/20 border-emerald-500 text-emerald-200 font-bold';
+                  badgeClass = 'bg-emerald-500 text-slate-950 font-black border-emerald-400';
                 } else if (isSelected && !isCorrect) {
                   btnClass = 'bg-rose-500/20 border-rose-500 text-rose-200 font-bold';
+                  badgeClass = 'bg-rose-500 text-white font-black border-rose-400';
                 } else {
                   btnClass = 'bg-slate-900/50 border-slate-800 text-slate-500';
+                  badgeClass = 'bg-slate-900 text-slate-600 border-slate-800';
                 }
               } else if (isSelected) {
-                btnClass = 'bg-sky-500/20 border-sky-500 text-white font-bold';
+                btnClass = 'bg-sky-500/20 border-sky-500 text-white font-bold ring-1 ring-sky-500/50';
+                badgeClass = 'bg-sky-500 text-white font-black border-sky-400';
               }
 
               return (
@@ -380,8 +394,13 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
                   disabled={isAnswerSubmitted}
                   className={`w-full p-4 rounded-2xl text-left text-xs sm:text-sm transition border flex items-center justify-between ${btnClass}`}
                 >
-                  <span>{option}</span>
-                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center text-[10px] ${
+                  <div className="flex items-center gap-3">
+                    <span className={`w-7 h-7 rounded-xl border flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-colors ${badgeClass}`}>
+                      {letter}
+                    </span>
+                    <span className="leading-relaxed">{option}</span>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center text-[10px] shrink-0 ${
                     isAnswerSubmitted && option === currentQuestion.correctAnswer
                       ? 'border-emerald-400 bg-emerald-500 text-white'
                       : isSelected && isAnswerSubmitted && !isCorrect
@@ -411,7 +430,7 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
                 }
               }}
               disabled={isAnswerSubmitted}
-              placeholder="Escribe aquí tu respuesta exacta en inglés..."
+              placeholder="Escribe aquí tu respuesta en inglés..."
               className={`w-full px-4 py-3.5 rounded-2xl bg-slate-950 border text-sm font-mono focus:outline-none transition ${
                 isAnswerSubmitted
                   ? isCorrect
@@ -421,7 +440,7 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
               }`}
             />
             {isAnswerSubmitted && !isCorrect && (
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-emerald-400 font-mono">
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-rose-300 font-mono">
                 Respuesta esperada: <strong className="text-white">{currentQuestion.correctAnswer}</strong>
               </div>
             )}

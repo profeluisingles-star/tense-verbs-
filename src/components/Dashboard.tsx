@@ -71,7 +71,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const currentLevelMeta = levelsMeta.find(l => l.id === selectedLevelId) || levelsMeta[0];
   const isLevelQuizPassed = progress.completedQuizzes.includes(selectedLevelId);
-  const allQuizzesPassed = progress.completedQuizzes.includes(1) && progress.completedQuizzes.includes(2) && progress.completedQuizzes.includes(3);
+  const isLvl1Passed = progress.completedQuizzes.includes(1);
+  const isLvl2Passed = progress.completedQuizzes.includes(2);
+  const isLvl3Passed = progress.completedQuizzes.includes(3);
+  const allQuizzesPassed = isLvl1Passed && isLvl2Passed && isLvl3Passed;
+
+  const isCurrentLevelUnlocked = 
+    selectedLevelId === 1 ? true :
+    selectedLevelId === 2 ? isLvl1Passed :
+    selectedLevelId === 3 ? isLvl2Passed : false;
 
   const finalExamModule = EVALUATION_MODULES.find(m => m.isFinalExam);
   const isFinalExamPassed = !!progress.finalExamScore;
@@ -339,26 +347,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={() => onStartStage3(selectedLevelId)}
-              className={`w-full py-3 rounded-xl font-black text-xs transition flex items-center justify-center gap-2 shadow-lg ${
-                isLevelQuizPassed
-                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-950/50'
-              }`}
-            >
-              {isLevelQuizPassed ? (
-                <>
-                  <RotateCcw className="w-4 h-4 text-emerald-400" />
-                  <span>Reintentar Quiz para Mejorar Nota</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 fill-current" />
-                  <span>Rendir Quiz Oficial (20 Preguntas)</span>
-                </>
-              )}
-            </button>
+            {isCurrentLevelUnlocked ? (
+              <button
+                onClick={() => onStartStage3(selectedLevelId)}
+                className={`w-full py-3 rounded-xl font-black text-xs transition flex items-center justify-center gap-2 shadow-lg ${
+                  isLevelQuizPassed
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-950/50'
+                }`}
+              >
+                {isLevelQuizPassed ? (
+                  <>
+                    <RotateCcw className="w-4 h-4 text-emerald-400" />
+                    <span>Reintentar Quiz para Mejorar Nota</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 fill-current" />
+                    <span>Rendir Quiz Oficial (20 Preguntas)</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="w-full py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-bold text-xs flex items-center justify-center gap-2">
+                <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Bloqueado: Requiere aprobar Quiz {selectedLevelId - 1} (mínimo 16/20)</span>
+              </div>
+            )}
           </div>
 
         </div>
@@ -370,22 +385,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
           ? 'bg-gradient-to-br from-[#0f172a] to-emerald-950/30 border-emerald-500/50'
           : allQuizzesPassed
           ? 'bg-gradient-to-br from-[#0f172a] to-amber-950/30 border-amber-500/60 shadow-[0_0_30px_rgba(245,158,11,0.15)]'
-          : 'bg-[#0a0f1d] border-slate-800 opacity-75'
+          : 'bg-[#0a0f1d] border-slate-800 opacity-90'
       }`}>
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
+          <div className="space-y-3 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border ${
                 isFinalExamPassed
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                   : allQuizzesPassed
                   ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
-                  : 'bg-slate-800 text-slate-500 border-slate-700'
+                  : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
               }`}>
-                {isFinalExamPassed ? '¡Examen Final Aprobado!' : allQuizzesPassed ? '¡Desbloqueado para Evaluación!' : 'Bloqueado por Requisitos'}
+                {isFinalExamPassed ? '¡Examen Final Aprobado!' : allQuizzesPassed ? '¡Desbloqueado para Evaluación!' : '🔒 Bloqueado: Requiere Quizzes 1, 2 y 3'}
               </span>
               <span className="text-xs text-slate-400 font-mono font-bold">
-                50 Preguntas Holísticas &bull; 3 Vidas
+                50 Preguntas Holísticas &bull; 3 Vidas &bull; Mínimo 43/50 (86%)
               </span>
             </div>
 
@@ -395,10 +410,63 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </h3>
 
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Prueba integral de acreditación lingüística sin ayudas externas. Abarca gramática, listening nativo, lectura crítica y formulación de oraciones.
+              Prueba integral de acreditación lingüística sin ayudas externas. Abarca gramática, listening nativo, lectura crítica y formulación de oraciones en los 12 tiempos verbales.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-1 text-xs">
+            {/* Checklist de Requisitos Obligatorios */}
+            <div className="pt-2">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Requisitos indispensables para rendir el Examen Final:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                  isLvl1Passed 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
+                    : 'bg-slate-900 border-slate-800 text-slate-400'
+                }`}>
+                  <span className="font-semibold">Quiz 1 (Presentes):</span>
+                  <span className="font-bold flex items-center gap-1">
+                    {isLvl1Passed ? (
+                      <><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Aprobado ({progress.quizScores[1]?.score || 16}/20)</>
+                    ) : (
+                      <><Lock className="w-3.5 h-3.5 text-amber-400" /> Pendiente</>
+                    )}
+                  </span>
+                </div>
+
+                <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                  isLvl2Passed 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
+                    : 'bg-slate-900 border-slate-800 text-slate-400'
+                }`}>
+                  <span className="font-semibold">Quiz 2 (Pasados):</span>
+                  <span className="font-bold flex items-center gap-1">
+                    {isLvl2Passed ? (
+                      <><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Aprobado ({progress.quizScores[2]?.score || 16}/20)</>
+                    ) : (
+                      <><Lock className="w-3.5 h-3.5 text-amber-400" /> Pendiente</>
+                    )}
+                  </span>
+                </div>
+
+                <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                  isLvl3Passed 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
+                    : 'bg-slate-900 border-slate-800 text-slate-400'
+                }`}>
+                  <span className="font-semibold">Quiz 3 (Futuros):</span>
+                  <span className="font-bold flex items-center gap-1">
+                    {isLvl3Passed ? (
+                      <><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Aprobado ({progress.quizScores[3]?.score || 16}/20)</>
+                    ) : (
+                      <><Lock className="w-3.5 h-3.5 text-amber-400" /> Pendiente</>
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-1 text-xs">
               <span className="bg-slate-900/90 border border-slate-800 px-3 py-1 rounded-xl text-slate-300">
                 Certificación B2: <strong className="text-amber-400">86 a 90 puntos</strong>
               </span>
@@ -408,26 +476,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-3">
+          <div className="w-full lg:w-auto flex flex-col gap-3 shrink-0">
             {allQuizzesPassed ? (
               <button
                 onClick={() => onStartStage3(4)}
-                className="px-6 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-xl shadow-amber-950/50 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-xl shadow-amber-950/50 flex items-center justify-center gap-2"
               >
                 <GraduationCap className="w-5 h-5" />
                 <span>{isFinalExamPassed ? 'Volver a Rendir Examen Final' : 'Comenzar Examen Final (50 Preguntas)'}</span>
               </button>
             ) : (
-              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-slate-400 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Supera los quizzes del Nivel 1, 2 y 3 para desbloquear</span>
+              <div className="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-xs text-amber-300 flex items-center gap-3">
+                <Lock className="w-5 h-5 text-amber-400 shrink-0" />
+                <div>
+                  <p className="font-bold text-white">Examen Final Estrictamente Bloqueado</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Debes aprobar los Quizzes 1, 2 y 3 (mínimo 16/20 en cada uno) antes de acceder.
+                  </p>
+                </div>
               </div>
             )}
 
-            {(isFinalExamPassed || (progress.completedQuizzes && progress.completedQuizzes.length >= 3)) && (
+            {isFinalExamPassed && (
               <button
                 onClick={onOpenCertificate}
-                className="px-5 py-4 rounded-2xl bg-white hover:bg-slate-200 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-lg flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-5 py-4 rounded-2xl bg-white hover:bg-slate-200 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-lg flex items-center justify-center gap-2"
               >
                 <Award className="w-5 h-5 text-amber-600" />
                 <span>Ver Mi Certificado Oficial</span>
